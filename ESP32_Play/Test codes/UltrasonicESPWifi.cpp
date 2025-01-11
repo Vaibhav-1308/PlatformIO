@@ -1,33 +1,16 @@
-
-/* 
-Here,(AP mode)
-    It acts as a Hot spot and connects with the device by wifi 
-    showing the SSID and displays the Password to connect 
+/*
+    It first connects to the flat wifi 
+    then it displays the IP of the webpage to connect
 */
-
-
 #include <Arduino.h>        // Base library for Arduino framework
 #include <WiFi.h>           // Library for Wi-Fi functionality
 #include <WebServer.h>      // Library to create a simple HTTP server
 #include <ESPmDNS.h>        // Library for mDNS (Multicast DNS) functionality
 #include <WiFiManager.h>    // Library to manage Wi-Fi connections
-#include <DNSServer.h>
-#include <Update.h>
 
 // Ultrasonic sensor pins
 const int trigPin = 38;
 const int echoPin = 37;
-const int L1 = 6;  //Pin for Led Red / Led 1
-const int L2 = 18;  //Pin for Led Green / Led 2
-const int L3 = 17;
-const int L4 = 16;
-const int Bz1 = 5;
-
-const char *apSSID = "ESP32_Access_Point"; // Access Point SSID
-const char *apPassword = "12345678";       // Access Point Password (at least 8 characters)
-
-long duration;
-int distance;
 
 // HTTP server object
 WebServer server(80);
@@ -38,25 +21,22 @@ void handleDistance();
 float getDistance();
 
 void setup() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT); 
-  pinMode(L3,OUTPUT); //Onboard Led
-  pinMode(L1, OUTPUT);  //Showing output on Led 1
-  pinMode(L2, OUTPUT);  // Showing output on Led 2
-  pinMode(L4, OUTPUT);
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
     Serial.begin(115200);
     Serial.println("Welcome to ESP32 Ultrasonic Sensor with WiFiManager!"); 
 
-    // Configure ESP32 as an Access Point
-    WiFi.softAP(apSSID, apPassword); // Create Wi-Fi Access Point
-    IPAddress IP = WiFi.softAPIP();  // Get IP address of the Access Point
-    Serial.print("\nTo Connect to the ESP32 use the credentials given below:\n");
-    Serial.print("SSID of ESP32 is ");
-    Serial.print(apSSID);
-    Serial.print("\nPassword of ESP32 is ");
-    Serial.println(apPassword);
-    Serial.print("\nAccess Point IP: ");
-    Serial.println(IP);              // Print the Access Point's IP address
+    WiFiManager wifiManager;
+
+    // Automatically connect or start AP for configuration
+    if (!wifiManager.autoConnect("ESP32-AP", "12345678")) {
+        Serial.println("Failed to connect and hit timeout");
+        ESP.restart();
+    }
+
+    Serial.println("Connected to Wi-Fi!");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 
     // Start mDNS service
     if (!MDNS.begin("esp32")) {
@@ -150,75 +130,5 @@ float getDistance() {
 
     // Calculate distance in cm (speed of sound = 343 m/s)
     float distance = (duration * 0.0343) / 2.0;
-
-      Serial.print("Distance: ");
-  Serial.println(distance);
-
-  if(distance <= 5) {
-    digitalWrite(L1, HIGH);   
-    delay(300);              
-    digitalWrite(L1, LOW);    
-    delay(300);  
-  } else if (distance > 5 && distance <= 10) {
-    digitalWrite(L2, HIGH);   
-    delay(300);              
-    digitalWrite(L2, LOW);    
-    delay(300);  
-  } else if (distance > 10 && distance <= 15) {  
-    digitalWrite(L3, HIGH);   
-    delay(300);              
-    digitalWrite(L3, LOW);    
-    delay(300);     
-  } else if (distance > 15 && distance <= 20) {
-    digitalWrite(L4, HIGH);   
-    delay(300);              
-    digitalWrite(L4, LOW);    
-    delay(300);
-  } else if (distance > 20 && distance <= 29) {
-    digitalWrite(L4, HIGH);   
-    delay(300);              
-    digitalWrite(L4, LOW);    
-    delay(300);
-   } else if (distance > 30) {
-    digitalWrite(Bz1, LOW);   
-    delay(500);              
-    digitalWrite(Bz1, HIGH);    
-    delay(500);   
-}
-
- delay(100);
-
     return distance;
 }
-
-
-/* 
-
-Platformio.ini File code
-
-
-; PlatformIO Project Configuration File
-;
-;   Build options: build flags, source filter
-;   Upload options: custom upload port, speed and extra flags
-;   Library options: dependencies, extra library storages
-;   Advanced options: extra scripting
-;
-; Please visit documentation for the other options and examples
-; https://docs.platformio.org/page/projectconf.html
-
-[env:esp32-s3-devkitc-1]
-platform = espressif32
-board = esp32-s3-devkitc-1
-framework = arduino
-upload_port = COM5
-monitor_dtr = 0 ; added for the serial monitor as given suggestions on the community page.
-monitor_rts = 0
-monitor_speed = 115200
-lib_deps = https://github.com/tzapu/WiFiManager
-	        ESPmDNS
-	        NetworkClient
-	        WiFiManager
-
-
-*/

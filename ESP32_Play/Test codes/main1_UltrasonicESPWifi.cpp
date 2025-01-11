@@ -17,17 +17,9 @@ Here,(AP mode)
 // Ultrasonic sensor pins
 const int trigPin = 38;
 const int echoPin = 37;
-const int L1 = 6;  //Pin for Led Red / Led 1
-const int L2 = 18;  //Pin for Led Green / Led 2
-const int L3 = 17;
-const int L4 = 16;
-const int Bz1 = 5;
 
 const char *apSSID = "ESP32_Access_Point"; // Access Point SSID
 const char *apPassword = "12345678";       // Access Point Password (at least 8 characters)
-
-long duration;
-int distance;
 
 // HTTP server object
 WebServer server(80);
@@ -38,12 +30,8 @@ void handleDistance();
 float getDistance();
 
 void setup() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT); 
-  pinMode(L3,OUTPUT); //Onboard Led
-  pinMode(L1, OUTPUT);  //Showing output on Led 1
-  pinMode(L2, OUTPUT);  // Showing output on Led 2
-  pinMode(L4, OUTPUT);
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
     Serial.begin(115200);
     Serial.println("Welcome to ESP32 Ultrasonic Sensor with WiFiManager!"); 
 
@@ -150,44 +138,6 @@ float getDistance() {
 
     // Calculate distance in cm (speed of sound = 343 m/s)
     float distance = (duration * 0.0343) / 2.0;
-
-      Serial.print("Distance: ");
-  Serial.println(distance);
-
-  if(distance <= 5) {
-    digitalWrite(L1, HIGH);   
-    delay(300);              
-    digitalWrite(L1, LOW);    
-    delay(300);  
-  } else if (distance > 5 && distance <= 10) {
-    digitalWrite(L2, HIGH);   
-    delay(300);              
-    digitalWrite(L2, LOW);    
-    delay(300);  
-  } else if (distance > 10 && distance <= 15) {  
-    digitalWrite(L3, HIGH);   
-    delay(300);              
-    digitalWrite(L3, LOW);    
-    delay(300);     
-  } else if (distance > 15 && distance <= 20) {
-    digitalWrite(L4, HIGH);   
-    delay(300);              
-    digitalWrite(L4, LOW);    
-    delay(300);
-  } else if (distance > 20 && distance <= 29) {
-    digitalWrite(L4, HIGH);   
-    delay(300);              
-    digitalWrite(L4, LOW);    
-    delay(300);
-   } else if (distance > 30) {
-    digitalWrite(Bz1, LOW);   
-    delay(500);              
-    digitalWrite(Bz1, HIGH);    
-    delay(500);   
-}
-
- delay(100);
-
     return distance;
 }
 
