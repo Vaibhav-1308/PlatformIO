@@ -1,7 +1,7 @@
 
 /* 
 Here,(AP mode)
-    It acts as a Hot spot and connects with the device by wifi 
+    It acts as a Hot spot and connects with the device (like mobile or laptop) by wifi 
     showing the SSID and displays the Password to connect 
 */
 
@@ -17,32 +17,21 @@ Here,(AP mode)
 // Ultrasonic sensor pins
 const int trigPin = 38;
 const int echoPin = 37;
-const int L1 = 6;  //Pin for Led Red / Led 1
-const int L2 = 18;  //Pin for Led Green / Led 2
-const int L3 = 17;
-const int Bz1 = 5;
 
 const char *apSSID = "ESP32_Access_Point"; // Access Point SSID
 const char *apPassword = "12345678";       // Access Point Password (at least 8 characters)
-
-long duration;
-int distance;
 
 // HTTP server object
 WebServer server(80);
 
 // Function prototypes
-void handleRoot();
+// void handleRoot();
 void handleDistance();
 float getDistance();
 
 void setup() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT); 
-  pinMode(L3,OUTPUT); //Onboard Led
-  pinMode(L1, OUTPUT);  //Showing output on Led 1
-  pinMode(L2, OUTPUT);  // Showing output on Led 2
-  pinMode(Bz1, OUTPUT);
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
     Serial.begin(115200);
     Serial.println("Welcome to ESP32 Ultrasonic Sensor with WiFiManager!"); 
 
@@ -62,14 +51,10 @@ void setup() {
         Serial.println("Error starting MDNS responder!");
     } else {
         Serial.println("MDNS responder started");
-    digitalWrite(L3, LOW);   
-    delay(200);              
-    digitalWrite(L3, HIGH);    
-    delay(200);     
     }
 
     // Define server routes
-    server.on("/", handleRoot);
+    // server.on("/", handleRoot);
     server.on("/distance", handleDistance);
     server.onNotFound([]() {
         server.send(404, "text/html", "Page Not Found - 404 error");
@@ -81,61 +66,6 @@ void setup() {
 
 void loop() {
     server.handleClient();
-}
-
-void handleRoot() {
-    // HTML content for the web page
-    String htmlPage = R"rawliteral(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Ultrasonic Sensor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 20%;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #333;
-        }
-        p {
-            font-size: 1.5rem;
-            color: #555;
-            border: 2px solid #333; /* Adds a solid border */
-            padding: 10px; /* Adds spacing inside the box */
-            display: inline-block; /* Ensures the box wraps only the text */
-            border-radius: 10px; /* Adds rounded corners to the box */
-            background-color: #f9f9f9; /* Adds a light background color */
-        }
-    </style>
-</head>
-<body>
-    <h1>Ultrasonic Sensor Distance</h1>
-    <p id="distance">Loading distance....</p>
-    <script>
-        function updateDistance() {
-            fetch('/distance')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('distance').innerText = `Distance: ${data.distance} cm`;
-                })
-                .catch(err => {
-                    document.getElementById('distance').innerText = 'Error fetching distance';
-                    console.error('Error:', err);
-                });
-        }
-
-        setInterval(updateDistance, 1000); // Update distance every second
-    </script>
-</body>
-</html>
-    )rawliteral";
-
-    server.send(200, "text/html", htmlPage);
 }
 
 void handleDistance() {
@@ -158,31 +88,6 @@ float getDistance() {
 
     // Calculate distance in cm (speed of sound = 343 m/s)
     float distance = (duration * 0.0343) / 2.0;
-
-      Serial.print("Distance: ");
-  Serial.println(distance);
-
-  if(distance <= 10) {
-    digitalWrite(L1, LOW);   
-    delay(200);              
-    digitalWrite(L1, HIGH);    
-    delay(200);  
-  } else if (distance > 10 && distance <= 20) {
-    digitalWrite(L2, LOW);   
-    delay(200);              
-    digitalWrite(L2, HIGH);    
-    delay(200);  
-  } else if (distance > 20 && distance <= 30) {  
-    digitalWrite(L3, LOW);   
-    delay(200);              
-    digitalWrite(L3, HIGH);    
-    delay(200);     
-   } else if (distance > 30) {
-    digitalWrite(Bz1, HIGH);   
-    delay(200);              
-    digitalWrite(Bz1, LOW);
-    delay(200);   
-}
     return distance;
 }
 
@@ -214,5 +119,6 @@ lib_deps = https://github.com/tzapu/WiFiManager
 	        ESPmDNS
 	        NetworkClient
 	        WiFiManager
+
 
 */
